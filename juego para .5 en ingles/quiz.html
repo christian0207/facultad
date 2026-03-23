@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz: Travel Planning</title>
+  <style>
+    :root {
+      --bg: #f7f9ff;
+      --card: #ffffff;
+      --accent: #0d6efd;
+      --accent-2: #0b5ed7;
+      --text: #1a1a1a;
+      --muted: #555;
+      --shadow: rgba(0, 0, 0, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #ff9a9e, #fad0c4 40%, #a18cd1 80%, #ffffff 100%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .container {
+      width: min(100%, 640px);
+      max-width: 640px;
+      background: var(--card);
+      border-radius: 18px;
+      box-shadow: 0 18px 40px var(--shadow);
+      padding: 2rem;
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin: 0 0 0.25rem;
+      font-size: clamp(1.5rem, 4vw, 2rem);
+      animation: rainbowText 6s linear infinite;
+      line-height: 1.2;
+    }
+
+    p.subtitle {
+      margin: 0 0 1.75rem;
+      color: var(--muted);
+      animation: rainbowText 8s ease-in-out infinite;
+      font-size: clamp(0.9rem, 2.2vw, 1rem);
+    }
+
+    .question {
+      margin: 1rem 0 1.5rem;
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      line-height: 1.5;
+    }
+
+    .options {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .option {
+      border: 2px solid rgba(13, 110, 253, 0.2);
+      border-radius: 12px;
+      padding: 1rem;
+      cursor: pointer;
+      transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+      user-select: none;
+      animation: rainbowBorder 8s linear infinite;
+      background: #fff;
+      word-break: break-word;
+    }
+
+    .option:hover {
+      background: rgba(13, 110, 253, 0.08);
+      transform: translateY(-1px);
+    }
+
+    .option.selected {
+      border-color: var(--accent);
+      background: rgba(13, 110, 253, 0.16);
+    }
+
+    .option.correct {
+      border-color: #198754;
+      background: rgba(25, 135, 84, 0.15);
+    }
+
+    .option.wrong {
+      border-color: #dc3545;
+      background: rgba(220, 53, 69, 0.12);
+    }
+
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1.5rem;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .controls .status {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 0.75rem 1.2rem;
+      font-size: 1rem;
+      font-weight: 600;
+      background: var(--accent);
+      color: #fff;
+      cursor: pointer;
+      transition: filter 0.15s ease, transform 0.15s ease;
+      min-width: 110px;
+    }
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+    }
+
+    .score {
+      font-weight: 700;
+      color: var(--accent-2);
+    }
+
+    .footer {
+      margin-top: 2rem;
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    @media (max-width: 900px) {
+      body {
+        padding: 1rem;
+      }
+      .container {
+        padding: 1.2rem;
+      }
+      .controls {
+        gap: 0.5rem;
+      }
+      button {
+        flex: 1 1 45%;
+        min-width: 120px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 0.8rem;
+      }
+      .container {
+        width: 100%;
+        padding: 1rem;
+        border-radius: 14px;
+      }
+      .question {
+        font-size: 1rem;
+      }
+      .option {
+        padding: 0.85rem;
+      }
+      .controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .controls > span,
+      .controls > div {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+      }
+      button {
+        min-width: unset;
+        width: 100%;
+      }
+    }
+
+    @media (min-width: 1200px) {
+      .container {
+        width: 580px;
+      }
+      .question {
+        font-size: 1.2rem;
+      }
+      .option {
+        padding: 1.15rem;
+      }
+    }
+
+    @keyframes rainbowText {
+      0% { color: #ff4b4b; }
+      25% { color: #f9c74f; }
+      50% { color: #43aa8b; }
+      75% { color: #4d96ff; }
+      100% { color: #ff4b4b; }
+    }
+
+    @keyframes rainbowBorder {
+      0% { border-color: #ff4b4b; }
+      25% { border-color: #f9c74f; }
+      50% { border-color: #43aa8b; }
+      75% { border-color: #4d96ff; }
+      100% { border-color: #ff4b4b; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container" role="main">
+    <header>
+      <h1>Travel Planning Quiz</h1>
+      <p class="subtitle">Answer questions about travel, accommodation, and transport. See your score at the end!</p>
+    </header>
+
+    <section id="quiz" aria-live="polite">
+      <div class="question" id="question"></div>
+
+      <ul class="options" id="options"></ul>
+
+      <div class="controls">
+        <span class="score" id="progress"></span>
+        <span class="score" id="lives"></span>
+        <div style="margin-left:auto; display:flex; gap:0.5rem; flex-wrap:wrap;">
+          <button id="checkBtn" disabled>Check</button>
+          <button id="nextBtn" disabled>Next</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer">
+      <p>Based on the theme <strong>"My Travel Plans"</strong> (Unit 6).</p>
+      <p style="margin-top:0.75rem; font-size:0.85rem; color:#666;">Credits: CHRISTIAN GAEL PEREZ GOMEZ, CESAR ALEXANDER BELTRAN LOPEZ, SERGIO ALEJANDRO MACHUCA SOLANO</p>
+    </div>
+  </main>
+
+  <script>
+    const questions = [
+      {
+        type: 'mcq',
+        question: "Where would you go to ask a travel agent for help?",
+        options: [
+          "At the train station",
+          "At a travel agency",
+          "At a restaurant",
+          "At the airport"
+        ],
+        answer: 1
+      },
+      {
+        type: 'mcq',
+        question: "What is the best phrase to start planning your vacation?",
+        options: [
+          "I want to book a flight",
+          "What time is it?",
+          "Where is the bathroom?",
+          "How much is this book?"
+        ],
+        answer: 0
+      },
+      {
+        type: 'mcq',
+        question: "If you travel abroad, what document do you need to board a flight?",
+        options: [
+          "A map",
+          "A credit card",
+          "A valid ID (passport)",
+          "A mobile phone"
+        ],
+        answer: 2
+      },
+      {
+        type: 'mcq',
+        question: "What is a benefit of booking a hotel in advance?",
+        options: [
+          "Fewer rooms available",
+          "A better chance of getting a good price",
+          "No places to eat",
+          "You have to travel farther"
+        ],
+        answer: 1
+      },
+      {
+        type: 'mcq',
+        question: "Which word means 'alojamiento' in English?",
+        options: [
+          "Accommodation",
+          "Transportation",
+          "Reservation",
+          "Customs"
+        ],
+        answer: 0
+      },
+      {
+        type: 'mcq',
+        question: "What is a safe way to carry money while traveling?",
+        options: [
+          "In a money belt",
+          "In your backpack on the bus seat",
+          "In your pocket with your phone",
+          "On a piece of paper in your wallet"
+        ],
+        answer: 0
+      },
+      {
+        type: 'mcq',
+        question: "When you arrive at the airport, where do you usually go first?",
+        options: [
+          "To the check-in desk",
+          "To the duty-free shop",
+          "To the boarding gate",
+          "To the baggage claim"
+        ],
+        answer: 0
+      },
+      {
+        type: 'mcq',
+        question: "What should you check before leaving your hotel room?",
+        options: [
+          "That you locked the door",
+          "That the TV is off",
+          "That the minibar is full",
+          "That the curtains are open"
+        ],
+        answer: 0
+      },
+      {
+        type: 'mcq',
+        question: "If your flight is delayed, what should you do first?",
+        options: [
+          "Go to the gate and check the board",
+          "Leave the airport",
+          "Buy something to eat",
+          "Call a friend"
+        ],
+        answer: 0
+      },
+      {
+        type: 'mcq',
+        question: "Which phrase is useful when booking accommodation?",
+        options: [
+          "I need a room with a view",
+          "Do you have Wi-Fi?",
+          "Can I pay later?",
+          "Where is the bathroom?"
+        ],
+        answer: 0
+      },
+      {
+        type: 'match',
+        question: "Match each word to the correct picture:",
+        items: [
+          { emoji: "🎫", label: "Boarding pass", answer: "Boarding pass" },
+          { emoji: "🛫", label: "Boarding", answer: "Boarding" },
+          { emoji: "🧳", label: "Passengers", answer: "Passengers" },
+          { emoji: "🛂", label: "Customs", answer: "Customs" }
+        ],
+        options: ["Boarding pass", "Boarding", "Passengers", "Customs"]
+      },
+      {
+        type: 'match',
+        question: "Match the word with the picture:",
+        items: [
+          { emoji: "🕒", label: "Departure board", answer: "Departure board" },
+          { emoji: "🛑", label: "Delayed", answer: "Delayed" },
+          { emoji: "🛬", label: "Gate", answer: "Gate" },
+          { emoji: "🧾", label: "Ticket", answer: "Ticket" }
+        ],
+        options: ["Departure board", "Delayed", "Gate", "Ticket"]
+      },
+      {
+        type: 'mcq',
+        question: "What does 'boarding gate' mean?",
+        options: [
+          "The place where you board the plane",
+          "The place to check luggage",
+          "The bus stop outside the airport",
+          "The area to buy tickets"
+        ],
+        answer: 0
+      },
+      {
+        type: 'mcq',
+        question: "What is a 'departure board' used for?",
+        options: [
+          "To check flight times",
+          "To get food",
+          "To buy souvenirs",
+          "To find a taxi"
+        ],
+        answer: 0
+      },
+      {
+        type: 'mcq',
+        question: "What should you do if you miss a connecting flight?",
+        options: [
+          "Talk to the airline staff",
+          "Leave the airport immediately",
+          "Take another airline without permission",
+          "Wait in the plane"
+        ],
+        answer: 0
+      },
+      {
+        type: 'mcq',
+        question: "Which item is usually not allowed in carry-on luggage?",
+        options: [
+          "A bottle of water larger than 100ml",
+          "A book",
+          "A phone",
+          "A jacket"
+        ],
+        answer: 0
+      },
+      {
+        type: 'mcq',
+        question: "What does 'itinerary' mean?",
+        options: [
+          "A plan for your trip",
+          "A place to sleep",
+          "A travel ticket",
+          "A type of baggage"
+        ],
+        answer: 0
+      },
+      {
+        type: 'mcq',
+        question: "What is a 'connecting flight'?",
+        options: [
+          "A flight that stops and continues to another city",
+          "A flight that is delayed",
+          "A flight with extra baggage",
+          "A flight that is cancelled"
+        ],
+        answer: 0
+      },
+      {
+        type: 'mcq',
+        question: "What do you usually get when you check in at an airport?",
+        options: [
+          "A boarding pass",
+          "A meal",
+          "A hotel room",
+          "A travel insurance"
+        ],
+        answer: 0
+      },
+      {
+        type: 'mcq',
+        question: "What is the best way to avoid losing your luggage?",
+        options: [
+          "Label your bags with your name and address",
+          "Put them on the floor",
+          "Ask someone else to carry them",
+          "Leave them unattended"
+        ],
+        answer: 0
+      }
+    ];
+
+    let current = 0;
+    let correctCount = 0;
+    let lives = 5;
+    let selectedOption = null;
+    let matchSelections = [];
+
+    const questionEl = document.getElementById('question');
+    const optionsEl = document.getElementById('options');
+    const progressEl = document.getElementById('progress');
+    const livesEl = document.getElementById('lives');
+    const checkBtn = document.getElementById('checkBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    function getHearts(count) {
+      return '♥'.repeat(count);
+    }
+
+    function updateStatus() {
+      progressEl.textContent = `Question ${current + 1} of ${questions.length}`;
+      livesEl.textContent = `Lives: ${getHearts(lives)} (${lives})`;
+    }
+
+    function renderQuestion() {
+      const item = questions[current];
+      questionEl.textContent = `${current + 1}. ${item.question}`;
+      optionsEl.innerHTML = '';
+      selectedOption = null;
+      matchSelections = [];
+      checkBtn.disabled = true;
+      nextBtn.disabled = true;
+
+      if (item.type === 'match') {
+        renderMatchQuestion(item);
+      } else {
+        renderMcqQuestion(item);
+      }
+
+      updateStatus();
+    }
+
+    function renderMcqQuestion(item) {
+      item.options.forEach((text, index) => {
+        const li = document.createElement('li');
+        li.className = 'option';
+        li.tabIndex = 0;
+        li.textContent = text;
+        li.dataset.index = index;
+
+        li.addEventListener('click', () => selectOption(li));
+        li.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            selectOption(li);
+          }
+        });
+
+        optionsEl.appendChild(li);
+      });
+    }
+
+    function renderMatchQuestion(item) {
+      const selectId = (qIdx, i) => `match-${qIdx}-${i}`;
+
+      item.items.forEach((sub, idx) => {
+        const li = document.createElement('li');
+        li.className = 'option';
+        li.style.display = 'grid';
+        li.style.gridTemplateColumns = '1.5rem 1fr';
+        li.style.alignItems = 'center';
+        li.style.gap = '0.75rem';
+
+        const emoji = document.createElement('span');
+        emoji.textContent = sub.emoji;
+        emoji.style.fontSize = '1.4rem';
+
+        const select = document.createElement('select');
+        select.id = selectId(current, idx);
+        select.style.width = '100%';
+        select.style.padding = '0.5rem';
+        select.style.borderRadius = '10px';
+        select.style.border = '1px solid rgba(0,0,0,0.2)';
+
+        const emptyOption = document.createElement('option');
+        emptyOption.value = '';
+        emptyOption.textContent = `Select word...`;
+        select.appendChild(emptyOption);
+
+        item.options.forEach((opt) => {
+          const optionEl = document.createElement('option');
+          optionEl.value = opt;
+          optionEl.textContent = opt;
+          select.appendChild(optionEl);
+        });
+
+        select.addEventListener('change', () => {
+          matchSelections[idx] = select.value;
+          const allFilled = item.items.every((_, i) => matchSelections[i]);
+          checkBtn.disabled = !allFilled;
+        });
+
+        li.appendChild(emoji);
+        li.appendChild(select);
+        optionsEl.appendChild(li);
+      });
+    }
+
+    function selectOption(li) {
+      const index = Number(li.dataset.index);
+      selectedOption = index;
+
+      Array.from(optionsEl.children).forEach((child) => {
+        child.classList.toggle('selected', child === li);
+      });
+
+      checkBtn.disabled = false;
+    }
+
+    function endGame(reason) {
+      const scorePercent = Math.round((correctCount / questions.length) * 100);
+      const message = `You got ${correctCount} of ${questions.length} correct (${scorePercent}%).`;
+      const points = `Points scored: ${correctCount}`;
+
+      questionEl.textContent = reason === 'lives' ? 'Game over!' : 'Quiz finished!';
+      optionsEl.innerHTML = `<li class="option correct" style="cursor: default;">${message}<br>${points}</li>`;
+      progressEl.textContent = reason === 'lives' ? 'No lives left' : 'Thanks for playing';
+      livesEl.textContent = '';
+
+      nextBtn.textContent = 'Restart';
+      nextBtn.disabled = false;
+      checkBtn.disabled = true;
+
+      nextBtn.onclick = () => {
+        current = 0;
+        correctCount = 0;
+        lives = 5;
+        nextBtn.onclick = null;
+        renderQuestion();
+      };
+    }
+
+    function showResult() {
+      const item = questions[current];
+
+      if (item.type === 'match') {
+        handleMatchResult(item);
+        return;
+      }
+
+      if (selectedOption === null) return;
+
+      const correctIndex = item.answer;
+
+      Array.from(optionsEl.children).forEach((child) => {
+        const idx = Number(child.dataset.index);
+        child.classList.remove('selected');
+
+        if (idx === correctIndex) {
+          child.classList.add('correct');
+        }
+
+        if (idx === selectedOption && idx !== correctIndex) {
+          child.classList.add('wrong');
+        }
+      });
+
+      if (selectedOption === correctIndex) {
+        correctCount += 1;
+      } else {
+        lives -= 1;
+        updateStatus();
+
+        if (lives <= 0) {
+          endGame('lives');
+          return;
+        }
+      }
+
+      checkBtn.disabled = true;
+      nextBtn.disabled = false;
+      nextBtn.textContent = current + 1 < questions.length ? 'Next' : 'See score';
+    }
+
+    function handleMatchResult(item) {
+      let allCorrect = true;
+
+      item.items.forEach((sub, idx) => {
+        const select = document.getElementById(`match-${current}-${idx}`);
+        const selectedValue = select.value;
+
+        select.style.borderColor = selectedValue === sub.answer ? '#198754' : '#dc3545';
+
+        if (selectedValue !== sub.answer) {
+          allCorrect = false;
+        }
+      });
+
+      if (allCorrect) {
+        correctCount += 1;
+      } else {
+        lives -= 1;
+        updateStatus();
+
+        if (lives <= 0) {
+          endGame('lives');
+          return;
+        }
+      }
+
+      checkBtn.disabled = true;
+      nextBtn.disabled = false;
+      nextBtn.textContent = current + 1 < questions.length ? 'Next' : 'See score';
+    }
+
+    checkBtn.addEventListener('click', () => showResult());
+    nextBtn.addEventListener('click', () => {
+      if (current + 1 < questions.length) {
+        current += 1;
+        renderQuestion();
+      } else {
+        endGame('done');
+      }
+    });
+
+    renderQuestion();
+  </script>
+</body>
+</html>
